@@ -10,13 +10,17 @@ const func = async(time) => {
 
 const main = async () => {
     const { results, errors } = await PromisePool
-        .for([func(10000), func(10000), func(500), func(200), func(10000),])
+        .for([10000, 2000, 1000, 3000])
         .withConcurrency(2)
+        .useCorrespondingResults()
         .handleError(async (error, user) => {
             console.error(`error $${error} at ${user}`)
         })
-        .process(async(member, index, pool) => {
-            const result = await member
+        .onTaskFinished((item, pool)=> {
+            console.log(`processed ${pool.processedPercentage()}`)
+        })
+        .process(async(item, index, pool) => {
+            const result = await func(item)
             return result
         })
         console.log(results)
